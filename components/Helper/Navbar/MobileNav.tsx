@@ -11,6 +11,7 @@ import {
   Settings,
   MapPin,
   Info,
+  Images,
   Calendar,
 } from "lucide-react";
 
@@ -25,6 +26,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Services: <Settings className="w-5 h-5" style={{ color: PRIMARY_GREEN }} />,
   Places: <MapPin className="w-5 h-5" style={{ color: PRIMARY_GREEN }} />,
   "About Us": <Info className="w-5 h-5" style={{ color: PRIMARY_GREEN }} />,
+  Gallery: <Images className="w-5 h-5" style={{ color: PRIMARY_GREEN }} />,
   Booking: <Calendar className="w-5 h-5" style={{ color: PRIMARY_GREEN }} />,
 };
 

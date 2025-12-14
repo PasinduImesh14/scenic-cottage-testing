@@ -1,8 +1,8 @@
+//app/api/rooms/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/auth";
 
-// Convert Base64 → Buffer
 function base64ToBuffer(base64?: string) {
   if (!base64) return undefined;
   const clean = base64.split(",")[1] || base64;
@@ -34,8 +34,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Room not found" }, { status: 404 });
       }
 
+      // ✅ FIX: Normalize 'ac' to YES/NO
       const roomWithBase64 = {
         ...room,
+        ac: room.ac === "AC" ? "YES" : "NO", 
         img1: room.img1 ? `data:image/jpeg;base64,${room.img1.toString("base64")}` : null,
         img2: room.img2 ? `data:image/jpeg;base64,${room.img2.toString("base64")}` : null,
         img3: room.img3 ? `data:image/jpeg;base64,${room.img3.toString("base64")}` : null,
@@ -52,6 +54,8 @@ export async function GET(req: NextRequest) {
 
     const roomsWithImages = rooms.map((room) => ({
       ...room,
+      // ✅ FIX: Normalize 'ac' to YES/NO
+      ac: room.ac === "AC" ? "YES" : "NO",
       img1: room.img1 ? `data:image/jpeg;base64,${room.img1.toString("base64")}` : null,
       img2: room.img2 ? `data:image/jpeg;base64,${room.img2.toString("base64")}` : null,
       img3: room.img3 ? `data:image/jpeg;base64,${room.img3.toString("base64")}` : null,
@@ -81,10 +85,10 @@ export async function POST(req: NextRequest) {
         cost: data.cost,
         offer: data.offer,
         size: data.size,
-        capacity: data.capacity, // ✅ manual capacity input
-
-        // Amenities
-        ac: data.ac,
+        capacity: data.capacity,
+        
+        // Enum is handled correctly here (Frontend sends AC/NonAC or conversion happens before)
+        ac: data.ac, 
         wifi: data.wifi,
         fan: data.fan,
         balcony: data.balcony,
@@ -97,14 +101,12 @@ export async function POST(req: NextRequest) {
         dryingRack: data.dryingRack,
         clothRack: data.clothRack,
 
-        // Media
         img1: base64ToBuffer(data.img1),
         img2: base64ToBuffer(data.img2),
         img3: base64ToBuffer(data.img3),
         img4: base64ToBuffer(data.img4),
         video: base64ToBuffer(data.video),
 
-        // Bedrooms
         bedrooms: {
           create: data.bedrooms?.map((b: any) => ({
             bedType: b.bedType,
@@ -112,7 +114,6 @@ export async function POST(req: NextRequest) {
           })) || [],
         },
 
-        // Bathrooms
         bathrooms: {
           create: data.bathrooms?.map((b: any) => ({
             shower: b.shower,
@@ -126,7 +127,6 @@ export async function POST(req: NextRequest) {
           })) || [],
         },
 
-        // Kitchen
         kitchen: data.kitchen
           ? {
               create: {
@@ -164,7 +164,6 @@ export async function PATCH(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "Room id required" }, { status: 400 });
 
-    // Delete old bedrooms, bathrooms, and kitchen
     await prisma.bedroom.deleteMany({ where: { roomId: id } });
     await prisma.bathroom.deleteMany({ where: { roomId: id } });
     await prisma.kitchen.deleteMany({ where: { roomId: id } });
@@ -176,7 +175,7 @@ export async function PATCH(req: NextRequest) {
         cost: data.cost,
         offer: data.offer,
         size: data.size,
-        capacity: data.capacity, // ✅ manual capacity input
+        capacity: data.capacity,
 
         ac: data.ac,
         wifi: data.wifi,

@@ -1,3 +1,4 @@
+//app/api/rooms/list/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -26,7 +27,7 @@ export async function GET() {
         dryingRack: true,
         clothRack: true,
 
-        // EXCLUDE images & video for speed
+        // EXCLUDE images & video
         img1: false,
         img2: false,
         img3: false,
@@ -41,7 +42,13 @@ export async function GET() {
       orderBy: { id: "asc" },
     });
 
-    return NextResponse.json({ rooms });
+    // ✅ FIX: Normalize 'ac' to YES/NO here as well
+    const normalizedRooms = rooms.map((room) => ({
+      ...room,
+      ac: room.ac === "AC" ? "YES" : "NO",
+    }));
+
+    return NextResponse.json({ rooms: normalizedRooms });
   } catch (err) {
     console.error("FAST GET Rooms Error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

@@ -7,9 +7,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-
   images: {
-    qualities: [90], // Add any custom qualities used in your Image components
+    // This enables the "Next.js Magic" to auto-convert your JPGs
+    formats: ["image/avif", "image/webp"], 
+    
+    // Your existing quality setting
+    qualities: [90], 
   },
 };
 
